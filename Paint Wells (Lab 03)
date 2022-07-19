@@ -1,0 +1,234 @@
+final int PAINT_WELL_REGION_INDIVIUAL_WIDTH = 150;
+final int PAINT_WELL_REGION_HEIGHT = 100;
+final int CURRENT_COLOR_HEIGHT = 50;
+final int SUBCANVAS_BUFFER = 75;
+int SUBCANVAS_CORNER_X;
+int SUBCANVAS_CORNER_Y;
+int SUBCANVAS_WIDTH;
+int SUBCANVAS_HEIGHT;
+
+
+final color BLACK = color(0,0,0);
+final color RED = color(255,0,0);
+final color GREEN = color(0,255,0);
+final color BLUE = color(0,0,255);
+final color YELLOW = color(255,255,0);
+final color ORANGE = color(255,128,0);
+final color PURPLE = color(128,0,255);
+final color WHITE = color(255,255,255);
+
+
+//Paint Well 1
+final int PAINT_WELL01_CORNER_X = 0;
+final int PAINT_WELL01_CORNER_Y = 0;
+final int PAINT_WELL01_WIDTH = PAINT_WELL_REGION_INDIVIUAL_WIDTH;
+final color PAINT_WELL01_COLOR = RED;
+
+//Paint Well 2
+final int PAINT_WELL02_CENTER_X = (int)(PAINT_WELL_REGION_INDIVIUAL_WIDTH*1.5);
+final int PAINT_WELL02_CENTER_Y = PAINT_WELL_REGION_HEIGHT/2;
+final int PAINT_WELL02_RADIUS = PAINT_WELL_REGION_HEIGHT/2;
+final color PAINT_WELL02_COLOR = GREEN;
+
+//Paint Well 3
+final int PAINT_WELL03_CENTER_X = (int)(PAINT_WELL_REGION_INDIVIUAL_WIDTH*2.5);
+final int PAINT_WELL03_CENTER_Y = PAINT_WELL_REGION_HEIGHT/2;
+final int PAINT_WELL03_RADIUS = PAINT_WELL_REGION_HEIGHT/2;
+final color PAINT_WELL03_COLOR = PURPLE;
+
+//Paint Well 4 Rectangle 1
+final int PAINT_WELL04_rect1_CORNER_X = (int)(PAINT_WELL_REGION_INDIVIUAL_WIDTH*3);
+final float PAINT_WELL04_rect1_CORNER_Y = (float)PAINT_WELL_REGION_HEIGHT/3;
+final int PAINT_WELL04_rect1_WIDTH = PAINT_WELL_REGION_INDIVIUAL_WIDTH-1; //-1 so that the outline on the right side shows up
+final float PAINT_WELL04_rect1_HEIGHT = (float)PAINT_WELL_REGION_HEIGHT/3;
+//Paint Well 4 Rectangle 2
+final int PAINT_WELL04_rect2_CORNER_X = (int)(PAINT_WELL_REGION_INDIVIUAL_WIDTH*3 + PAINT_WELL_REGION_INDIVIUAL_WIDTH/3);
+final int PAINT_WELL04_rect2_CORNER_Y = 0;
+final int PAINT_WELL04_rect2_WIDTH = PAINT_WELL_REGION_INDIVIUAL_WIDTH/3;
+final int PAINT_WELL04_rect2_HEIGHT = PAINT_WELL_REGION_HEIGHT;
+final color PAINT_WELL04_COLOR = YELLOW;
+
+
+color currentBrushColor;
+int brushRadius;
+
+
+void setup() {
+  size(600, 600);   
+  background(255); 
+  noStroke();
+  
+  frameRate(30);   
+  
+  ellipseMode(RADIUS);
+  //fill(PURPLE);
+  brushRadius = 7;
+  
+  SUBCANVAS_CORNER_X = SUBCANVAS_BUFFER;
+  SUBCANVAS_CORNER_Y = PAINT_WELL_REGION_HEIGHT+SUBCANVAS_BUFFER;
+  SUBCANVAS_WIDTH = width-2*SUBCANVAS_BUFFER;
+  SUBCANVAS_HEIGHT = height-PAINT_WELL_REGION_HEIGHT-CURRENT_COLOR_HEIGHT-2*SUBCANVAS_BUFFER;
+  
+  drawPaintWells();
+}
+
+
+void draw() {
+  int currentX = mouseX;
+  int currentY = mouseY;
+  
+  //Deal with color change due to touching color in paint well
+  if (inPaintWell01(currentX, currentY)) {
+    currentBrushColor = PAINT_WELL01_COLOR;
+  } else if (inPaintWell02(currentX, currentY)) {
+      currentBrushColor = PAINT_WELL02_COLOR;
+  } else if (inPaintWell03(currentX, currentY)) {
+      currentBrushColor = PAINT_WELL03_COLOR;
+  } else if (inPaintWell04(currentX, currentY)) {
+      currentBrushColor = PAINT_WELL04_COLOR;
+  } 
+
+  drawsubCanvasOutline();
+  drawCurrentBrushColorReminder();
+  if (inSubCanvas(currentX, currentY)) {
+    fill(currentBrushColor);
+    ellipse(currentX, currentY, brushRadius, brushRadius); // this command draws the dot
+    }
+}
+
+
+void drawPaintWells() {
+  pushStyle();
+  drawPaintWell01();
+  drawPaintWell02();
+  drawPaintWell03();
+  drawPaintWell04();
+  popStyle();
+}
+
+
+//Subcanvas
+boolean inSubCanvas(int x, int y) {
+  return (
+    (x >= SUBCANVAS_CORNER_X) && (x <= SUBCANVAS_CORNER_X+SUBCANVAS_WIDTH) 
+      &&
+    (y >= SUBCANVAS_CORNER_Y) && (y <= SUBCANVAS_CORNER_Y+SUBCANVAS_HEIGHT) 
+  );
+}
+void drawsubCanvasOutline() {
+  pushStyle();
+  rectMode(CORNER);
+  stroke(BLACK);
+  strokeWeight(2);
+  noFill();
+  rect(SUBCANVAS_CORNER_X, SUBCANVAS_CORNER_Y, SUBCANVAS_WIDTH, SUBCANVAS_HEIGHT);
+  popStyle();
+}
+
+
+//Paint Well 1
+boolean inPaintWell01(int x, int y) {
+  return (
+    (x >= PAINT_WELL01_CORNER_X) && (x <= PAINT_WELL01_CORNER_X+PAINT_WELL01_WIDTH) 
+      &&
+    (y >= PAINT_WELL01_CORNER_Y) && (y <= PAINT_WELL01_CORNER_Y+PAINT_WELL_REGION_HEIGHT) 
+  );
+}
+void drawPaintWell01() {
+  pushStyle();
+  rectMode(CORNER);
+  stroke(BLACK);
+  strokeWeight(1);
+  fill(PAINT_WELL01_COLOR);
+  rect(PAINT_WELL01_CORNER_X, PAINT_WELL01_CORNER_Y, PAINT_WELL01_WIDTH, PAINT_WELL_REGION_HEIGHT);
+  popStyle();
+}
+
+//Paint Well 2
+boolean inPaintWell02(int x, int y) {
+ float distanceFromCenter = sqrt( pow(x-PAINT_WELL02_CENTER_X,2) +  pow(y-PAINT_WELL02_CENTER_Y,2) );
+  return distanceFromCenter <= PAINT_WELL02_RADIUS;
+}
+void drawPaintWell02() {
+  pushStyle();
+  ellipseMode(RADIUS);
+  stroke(BLACK);
+  strokeWeight(1);
+  fill(PAINT_WELL02_COLOR);
+  ellipse(PAINT_WELL02_CENTER_X, PAINT_WELL02_CENTER_Y, PAINT_WELL02_RADIUS, PAINT_WELL02_RADIUS);
+  popStyle();
+}
+
+//Paint Well 3
+boolean inPaintWell03(int x, int y) {
+ float distanceFromCenter = sqrt( pow(x-PAINT_WELL03_CENTER_X,2) +  pow(y-PAINT_WELL03_CENTER_Y,2) );
+  return distanceFromCenter <= PAINT_WELL03_RADIUS;
+}
+void drawPaintWell03() {
+  pushStyle();
+  stroke(BLACK);
+  strokeWeight(1);
+  fill(PAINT_WELL03_COLOR);
+  ellipse(PAINT_WELL03_CENTER_X, PAINT_WELL03_CENTER_Y, PAINT_WELL03_RADIUS, PAINT_WELL03_RADIUS);
+  //int BaseLength = 150;
+  //triangle(PAINT_WELL03_CENTER_X,0, PAINT_WELL03_CENTER_X+(BaseLength/2),PAINT_WELL_REGION_HEIGHT, PAINT_WELL03_CENTER_X-(BaseLength/2),PAINT_WELL_REGION_HEIGHT);
+  popStyle();
+}
+
+//Paint Well 4
+boolean inPaintWell04(int x, int y) {
+ return (
+    (x >= PAINT_WELL04_rect1_CORNER_X) && (x <= PAINT_WELL04_rect1_CORNER_X+PAINT_WELL04_rect1_WIDTH) 
+      &&
+    (y >= PAINT_WELL04_rect1_CORNER_Y) && (y <= PAINT_WELL04_rect1_CORNER_Y+PAINT_WELL04_rect1_HEIGHT)
+    ||
+    (x >= PAINT_WELL04_rect2_CORNER_X) && (x <= PAINT_WELL04_rect1_CORNER_X+PAINT_WELL04_rect2_WIDTH) 
+      &&
+    (y >= PAINT_WELL04_rect2_CORNER_Y) && (y <= PAINT_WELL04_rect2_CORNER_Y+PAINT_WELL04_rect2_HEIGHT)
+  );
+}
+void drawPaintWell04() {
+  pushStyle();
+  rectMode(CORNER);
+  stroke(BLACK);
+  strokeWeight(1);
+  fill(PAINT_WELL04_COLOR);
+  rect(PAINT_WELL04_rect1_CORNER_X,PAINT_WELL04_rect1_CORNER_Y, PAINT_WELL04_rect1_WIDTH,PAINT_WELL04_rect1_HEIGHT);
+  rect(PAINT_WELL04_rect2_CORNER_X,PAINT_WELL04_rect2_CORNER_Y, PAINT_WELL04_rect2_WIDTH,PAINT_WELL04_rect2_HEIGHT);
+  popStyle();
+}
+
+
+//Color Reminder
+void drawCurrentBrushColorReminder() {
+  pushStyle();
+  fill(currentBrushColor);
+  rectMode(CORNER);
+  rect(0,height-CURRENT_COLOR_HEIGHT, width,CURRENT_COLOR_HEIGHT);
+  
+  popStyle();
+}
+
+//TASK 03
+//This provided code only handles making the brush stroke smaller.
+void mouseClicked(MouseEvent event) {
+
+  if (event.getButton() == LEFT)  {
+    if (brushRadius > 1) {
+      brushRadius--;
+    }
+  }
+  if (event.getButton() == RIGHT)  {
+    if (brushRadius < 20) {
+      brushRadius++;
+      print("*");
+    }
+  }
+}
+
+
+void keyPressed(KeyEvent e) {
+  if (e.getKey() == 's') {
+    saveFrame("JP-####.png");
+  }
+}
